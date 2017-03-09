@@ -68,6 +68,12 @@ input {
     width:50%;
 }
 
+::-webkit-clear-button
+{
+    display: none; /* Hide the button */
+    -webkit-appearance: none; /* turn off default browser styling */
+}
+
 button[disabled] {
     background-color: #eee;
     color: #999;
