@@ -14,7 +14,7 @@ import { CalendarEventService } from './calendar-event.service';
             <button (click)="incrementMonth()">></button>
         </div>
         <div *ngFor="let eventsList of MonthWithEvents; let i = index" class="day"> 
-        {{i + 1}}
+        {{(i + 1) + getSuffixForNumber(i + 1)}} 
         <div *ngIf="eventsList">    
             <div *ngFor="let event of eventsList; let j = index">
                     <my-event *ngIf="MonthWithEvents[i][j]" [(ngModel)]='MonthWithEvents[i][j]'
@@ -50,6 +50,21 @@ export class CalendarEventListComponent implements OnInit {
 
         return monthWithEvents;
 
+    }
+
+    getSuffixForNumber(i: number): string {
+        //TODO use a lib
+        let iStr = i.toString();
+        let units = parseInt(iStr[iStr.length - 1]);
+        let tens = parseInt(iStr[iStr.length - 2])
+        if(tens === 1 || units >= 4 || units === 0) {
+            return 'th';
+        }
+        return [
+            'st',
+            'nd',
+            'rd'
+        ][units - 1];
     }
 
     getCalendarEventsForMonth(month: number, year: number): CalendarEvent[] {
