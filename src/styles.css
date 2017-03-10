@@ -43,7 +43,6 @@ my-app {
 }
 
 button {
-    background-color: #4CAF50;
     border: none;
     color: white;
     padding: 16px 32px;
@@ -54,6 +53,12 @@ button {
     box-shadow: #eee 0px 2px 3px;
     font-size: 0.75em !important;
     font-family: 'Roboto Slab' !important;
+    background: -webkit-gradient(linear, 0 0, 0 bottom, from(#4CAF50), to(#3AA947));
+    background: -webkit-linear-gradient(#4CAF50, #3AA947);
+    background: -moz-linear-gradient(#4CAF50, #3AA947);
+    background: -ms-linear-gradient(#4CAF50, #3AA947);
+    background: -o-linear-gradient(#4CAF50, #3AA947);
+    background: linear-gradient(#4CAF50, #3AA947);
 }
 
 input {
@@ -75,7 +80,7 @@ input {
 }
 
 button[disabled] {
-    background-color: #eee;
+    background: #eee !important;
     color: #999;
     cursor: not-allowed;
 }
@@ -97,5 +102,6 @@ h1 {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
 
 
