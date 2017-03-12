@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { CalendarEvent } from './calendar-event';
 import { CalendarEventService } from './calendar-event.service';
+import { LogInService } from './login.service';
 
 @Component({
     selector: 'my-event-list',
@@ -27,28 +28,29 @@ import { CalendarEventService } from './calendar-event.service';
 })
 export class CalendarEventListComponent implements OnInit {
 
-    constructor(private calendarEventService: CalendarEventService) { }
+    constructor(private calendarEventService: CalendarEventService, private logInService: LogInService) { }
 
     MonthWithEvents: CalendarEvent[][];
     DateOfView: Date;
 
     ngOnInit(): void {
         this.DateOfView = new Date();
-        this.MonthWithEvents = this.GetMonthWithEvents();
+        this.GetMonthWithEvents();
     }
 
-    GetMonthWithEvents(): CalendarEvent[][] {
+    GetMonthWithEvents(): void {
         let daysInMonth = new Date(this.DateOfView.getFullYear(), this.DateOfView.getMonth() + 1, 0).getDate();
         let monthWithEvents = new Array<Array<CalendarEvent>>(daysInMonth);
 
-        this.getCalendarEventsForMonth(this.DateOfView.getMonth(), this.DateOfView.getFullYear()).forEach(ce => {
-            if (monthWithEvents[ce.dateAndTime.getDate()-1] === undefined) {
-                monthWithEvents[ce.dateAndTime.getDate()-1] = new Array<CalendarEvent>();
-            }
-            monthWithEvents[ce.dateAndTime.getDate()-1].push(ce);
-        });
-
-        return monthWithEvents;
+        this.getCalendarEventsForMonth(this.DateOfView.getMonth(), this.DateOfView.getFullYear())
+            .then(evs => evs.forEach(ce => {
+                if (monthWithEvents[ce.date.getDate() - 1] === undefined) {
+                    monthWithEvents[ce.date.getDate() - 1] = new Array<CalendarEvent>();
+                }
+                return monthWithEvents[ce.date.getDate() - 1].push(ce);
+            })).then(events =>
+                this.MonthWithEvents = monthWithEvents
+            ).catch(this.logInService.logOutAndReload);
 
     }
 
@@ -57,7 +59,7 @@ export class CalendarEventListComponent implements OnInit {
         let iStr = i.toString();
         let units = parseInt(iStr[iStr.length - 1]);
         let tens = parseInt(iStr[iStr.length - 2])
-        if(tens === 1 || units >= 4 || units === 0) {
+        if (tens === 1 || units >= 4 || units === 0) {
             return 'th';
         }
         return [
@@ -67,7 +69,8 @@ export class CalendarEventListComponent implements OnInit {
         ][units - 1];
     }
 
-    getCalendarEventsForMonth(month: number, year: number): CalendarEvent[] {
+    getCalendarEventsForMonth(month: number, year: number): Promise<CalendarEvent[]> {
+        let calendarEvents: CalendarEvent[] = null;
         return this.calendarEventService.getCalendarEventsForMonth(month, year);
     }
 
@@ -83,20 +86,15 @@ export class CalendarEventListComponent implements OnInit {
 
     incrementMonth(): void {
         this.DateOfView.setMonth(this.DateOfView.getMonth() + 1);
-        this.MonthWithEvents = this.GetMonthWithEvents();
+        this.GetMonthWithEvents();
     }
 
-     decrementMonth(): void {
+    decrementMonth(): void {
         this.DateOfView.setMonth(this.DateOfView.getMonth() - 1);
-        this.MonthWithEvents = this.GetMonthWithEvents();
+        this.GetMonthWithEvents();
     }
 
-
-    getAllCalendarEvents(): CalendarEvent[] {
-        return this.calendarEventService.getAllCalendarEvents();
-    }
-
-    updateMonth():void {        
-        this.MonthWithEvents = this.GetMonthWithEvents();
+    updateMonth(): void {
+        this.GetMonthWithEvents();
     }
 }

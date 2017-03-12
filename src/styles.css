@@ -9,6 +9,11 @@ my-app {
   width: 50%;
   margin: 0 auto;
 }
+@media screen and (max-width: 850px){
+  #calendar {
+    width: 95%;
+  }
+}
 
 #Calendar div{
   text-align: center;

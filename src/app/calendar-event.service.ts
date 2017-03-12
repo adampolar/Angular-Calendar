@@ -1,38 +1,64 @@
 import { Injectable } from '@angular/core';
+import { Headers, Http, Response } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
 
 import { CalendarEvent } from './calendar-event'
+import { LogInService } from './login.service'
 
 @Injectable()
 export class CalendarEventService {
-    CALENDAR_EVENTS = [
-            {id: 1, eventName: "Christmas", dateAndTime: new Date(2017,11,25,0,0,0,0)},
-            {id: 2, eventName: "Adams birthday", dateAndTime: new Date(2017,3,1,0,0,0,0)},
-            {id: 3, eventName: "Boxing Day", dateAndTime: new Date(2017,11,26,0,0,0,0)},
-            {id: 4, eventName: "1", dateAndTime: new Date(2017,2,1,0,0,0,0)},
-            {id: 5, eventName: "2", dateAndTime: new Date(2017,2,5,0,0,0,0)},
-            {id: 6, eventName: "3", dateAndTime: new Date(2017,2,26,0,0,0,0)},
-            {id: 7, eventName: "4", dateAndTime: new Date(2017,2,11,0,0,0,0)},
-        ];
 
-    getAllCalendarEvents() : CalendarEvent[] {
-        return this.CALENDAR_EVENTS;
+    calendarEventsUrl = 'api/events'
+
+    constructor(private http: Http, private logInService : LogInService) { }
+
+    getHeaders = (() => new Headers({
+      'X-PASS': this.logInService.getPassword(),
+      'Content-type' :  'application/json'
+    }));
+
+    getAllCalendarEvents(): Promise<CalendarEvent[]> {
+        return this.http
+            .get(this.calendarEventsUrl, {headers: this.getHeaders()})
+            .toPromise()
+            .then(response => { 
+                let res = response.json() as CalendarEvent[];
+                res.forEach(ev => {
+                    ev.date = new Date(ev.date);
+                });
+                return res;
+            });
     }
 
-    getCalendarEventsForMonth(month:number, year:number) {
-        return this.getAllCalendarEvents().filter(
-            ce => ce.dateAndTime.getMonth() === month && ce.dateAndTime.getFullYear() === year);
+    getCalendarEventsForMonth(month: number, year: number): Promise<CalendarEvent[]> {
+        return this.getAllCalendarEvents().then(events => events.filter(
+            ce => ce.date.getMonth() === month && ce.date.getFullYear() === year));
     }
 
-    save(calendarEvent: CalendarEvent){
-        if(calendarEvent.id){
+    save(calendarEvent: CalendarEvent): Promise<void> {
+
+        if (calendarEvent.id) {
+            let url = `${this.calendarEventsUrl}/${calendarEvent.id}`;
+            return this.http
+                .put(url, JSON.stringify(calendarEvent), {headers: this.getHeaders()})
+                .toPromise()
+                .then(r => null);
 
         } else {
-            calendarEvent.id = this.CALENDAR_EVENTS.sort(e => e.id)[this.CALENDAR_EVENTS.length - 1].id + 1;          
-            this.CALENDAR_EVENTS.push(calendarEvent);
+            return this.http
+                .post(this.calendarEventsUrl, JSON.stringify(calendarEvent), {headers: this.getHeaders()})
+                .toPromise()
+                .then(r => null);
         }
     }
 
-    delete(calendarEvent: CalendarEvent) {
-        this.CALENDAR_EVENTS.splice(this.CALENDAR_EVENTS.findIndex(a => a.id === calendarEvent.id), 1);
+    delete(calendarEvent: CalendarEvent): Promise<void> {
+        let url = `${this.calendarEventsUrl}/${calendarEvent.id}`;
+        return this.http
+            .delete(url, {headers: this.getHeaders()})
+            .toPromise()
+            .then(() => null);
+
     }
 }

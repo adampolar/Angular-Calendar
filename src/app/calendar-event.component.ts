@@ -2,6 +2,7 @@ import { Component, Input, forwardRef, EventEmitter, Output } from '@angular/cor
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { CalendarEventService } from './calendar-event.service';
+import { LogInService } from './login.service';
 
 import { CalendarEvent } from './calendar-event';
 
@@ -17,11 +18,11 @@ import { CalendarEvent } from './calendar-event';
   template: `
   <div class="calendar-event">
     <div *ngIf="!editMode && !addOnlyMode">
-      <p>{{event.eventName}}</p>
+      <p>{{event.name}}</p>
     </div>
     <div *ngIf="editMode || addOnlyMode">
-      <p><my-datepicker [(ngModel)]='event.dateAndTime'></my-datepicker></p>
-      <p><input [(ngModel)]="event.eventName"></p>
+      <p><my-datepicker [(ngModel)]='event.date'></my-datepicker></p>
+      <p><input [(ngModel)]="event.name"></p>
     </div>
     <div>
     <div *ngIf="!addOnlyMode">
@@ -37,10 +38,12 @@ import { CalendarEvent } from './calendar-event';
 })
 export class CalendarEventComponent implements ControlValueAccessor {
 
+ 
+
   writeValue(value: any): void {
     if (value !== null && value !== undefined) {
       this.event = value;
-    } 
+    }
   }
 
   propagateChange = (_: any) => { };
@@ -56,10 +59,10 @@ export class CalendarEventComponent implements ControlValueAccessor {
   }
 
 
-  constructor(private calendarEventService: CalendarEventService) {
-      this.event = new CalendarEvent();
-      this.event.dateAndTime = new Date();
-   }
+  constructor(private calendarEventService: CalendarEventService, private logInService : LogInService) {
+    this.event = new CalendarEvent();
+    this.event.date = new Date();
+  }
 
   editMode = false;
 
@@ -77,18 +80,21 @@ export class CalendarEventComponent implements ControlValueAccessor {
 
   save(): void {
     this.editMode = false;
-    this.calendarEventService.save(this.event);
+    this.calendarEventService.save(this.event).catch(this.logInService.logOutAndReload);
   }
 
   add(): void {
-    this.calendarEventService.save(this.event);
-    this.event = new CalendarEvent();
-    this.event.dateAndTime = new Date();
-    this.notify.emit();
+
+    this.calendarEventService.save(this.event)
+      .then(() => this.notify.emit())
+      .then(() => {
+        this.event = new CalendarEvent();
+        this.event.date = new Date();
+      }).catch(this.logInService.logOutAndReload);
   }
 
   delete(): void {
-    this.calendarEventService.delete(this.event);
-    this.notify.emit();
+    this.calendarEventService.delete(this.event)
+      .then(() => this.notify.emit()).catch(this.logInService.logOutAndReload);
   }
 }
