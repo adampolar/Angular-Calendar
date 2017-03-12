@@ -26,11 +26,9 @@ export class PasswordComponent {
 
     logIn()
     {
-        if(this.logInService.isPasswordCorrect(this.password)) {
-            this.notify.emit();
-        } else {
-            this.password = '';
-        }
+        this.logInService.isPasswordCorrect(this.password)
+        .then(a => this.notify.emit())
+        .catch(a => this.password = '');
     }
 
 

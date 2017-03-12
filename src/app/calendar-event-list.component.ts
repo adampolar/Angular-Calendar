@@ -7,7 +7,7 @@ import { LogInService } from './login.service';
 @Component({
     selector: 'my-event-list',
     template: `
-    <div id="calendar">
+    <div>
         <my-event [addOnlyMode]='true' (notify)="updateMonth()"></my-event>
         <div>
             <button (click)="decrementMonth()"><</button>

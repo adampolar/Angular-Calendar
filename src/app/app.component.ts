@@ -5,11 +5,13 @@ import { LogInService } from './login.service'
   selector: 'my-app',
   template: `
   <h1>Your Calendar</h1>
-  <div *ngIf="isLoggedIn">
-    <my-event-list></my-event-list>
-  </div>
-  <div *ngIf="!isLoggedIn">
-    <my-password-dialog (notify)="isLoggedIn=true;"></my-password-dialog>
+  <div  id="calendar">
+    <div *ngIf="isLoggedIn">
+      <my-event-list></my-event-list>
+    </div>
+    <div *ngIf="!isLoggedIn">
+      <my-password-dialog (notify)="isLoggedIn=true;"></my-password-dialog>
+    </div>
   </div>`,
 })
 export class AppComponent implements OnInit {

@@ -11,22 +11,22 @@ export class LogInService {
     constructor(private http: Http) { }
 
     headers = new Headers({
-      'Content-type' :  'application/json'
+        'Content-type': 'application/json'
     });
 
     isPasswordCorrect(password: string): Promise<boolean> {
         return this.http
-            .post('api/events/isPasswordCorrect/' + password, {headers: this.headers})
+            .post('api/events/isPasswordCorrect/' + password, { headers: this.headers })
             .toPromise()
             .then(response => {
-                if(response.ok) {
+                if (response.ok) {
                     localStorage.setItem("password", password);
                 }
                 return response.ok;
             });
     }
 
-    clearLogin(): void{
+    clearLogin(): void {
         localStorage.clear();
     }
 
@@ -38,5 +38,5 @@ export class LogInService {
         return localStorage.getItem("password");
     }
 
-    logOutAndReload = () => { localStorage.clear(); location.reload(); }
+    logOutAndReload = (e: any) => { localStorage.clear(); location.reload(); }
 }
